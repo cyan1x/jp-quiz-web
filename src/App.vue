@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, type Ref, onMounted, nextTick, computed } from "vue"
 import { marked } from "marked"
-import { jpdefs } from "./jpdefs"
+import { jpdefs } from "./dictionaries/jpdefs"
 import { useScoreStore } from "./stores/counter"
 import { convertStringToHiragana } from "./convert"
 
