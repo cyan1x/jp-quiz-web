@@ -78,6 +78,7 @@ function newQuestion() {
 
 startTimer()
 const streakTime = 3000
+const lockInput = ref(false)
 
 function checkAnswer() {
   // Skip question
@@ -93,29 +94,45 @@ function checkAnswer() {
     clearResponse()
   }
 
+  // All hints used up
+  if (questions.hintLevel === questions.currentHint.length) {
+    lockInput.value = true
+    response.value = "answer revealed"
+    setTimeout(() => {
+      lockInput.value = false
+      newQuestion()
+      nextTick(() => {
+        input.value.focus()
+      })
+    }, 3000)
+  }
+
   const answers = questions.currentQuestion.answer.map((answer) =>
     convertStringToHiragana(answer)
   )
   const hiragana = convertStringToHiragana(response.value.trim())
+  // Answer is correct
   if (answers.includes(hiragana)) {
-    scores.currentScore += 1
+    const questionValue = Math.floor(
+      10 / Math.max(1, 2.5 * questions.hintLevel)
+    )
+    scores.increase(questionValue)
     showScorePlus.value = true
-    scorePlusStreak.value += 1
+    scorePlusStreak.value += questionValue
     scorePlusDuration.value = streakTime
-    scores.increment()
     newQuestion()
   }
 }
 
-const resetMessages = ["reset", "confirm?"] as const
-const resetMessage: Ref<(typeof resetMessages)[number]> = ref("reset")
+const resetMessages = ["reset scores", "confirm?"] as const
+const resetMessage: Ref<(typeof resetMessages)[number]> = ref("reset scores")
 
 function resetScores() {
-  if (resetMessage.value === "reset") {
+  if (resetMessage.value === "reset scores") {
     resetMessage.value = "confirm?"
   } else {
     scores.reset()
-    resetMessage.value = "reset"
+    resetMessage.value = "reset scores"
   }
 }
 
@@ -181,15 +198,17 @@ newQuestion()
         ></pre>
 
         <input
-          class="bg-transparent m-2 text-lg border-solid border-2 border-gray-500 rounded-sm text-center"
+          :disabled="lockInput"
+          class="disabled:text-gray-500 bg-transparent m-2 text-lg border-solid border-2 border-gray-500 rounded-sm text-center"
           ref="input"
           v-model="response"
           @keyup.enter="checkAnswer"
+          spellcheck="false"
         />
 
         <div class="flex flex-col m-2">
           <span class="mt-3"
-            >current score: {{ scores.currentScore }}
+            >round score: {{ scores.currentScore }}
             <span :class="arrowClass" class="text-[color:var(--accent-color)]"
               >+{{ scorePlusStreak || 1 }}</span
             >
@@ -197,7 +216,7 @@ newQuestion()
             <!-- <span> ({{ scorePlusDuration }})</span> -->
           </span>
 
-          <span class="mt-1">overall: {{ scores.totalScore }}</span>
+          <span class="mt-1">all time: {{ scores.totalScore }}</span>
           <div class="flex flex-col mt-2 gap-2">
             <button
               class="border-solid border-2 border-gray-500 p-1 rounded-md"
