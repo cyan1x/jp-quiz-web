@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, type Ref, onMounted, nextTick, computed } from "vue"
 import { marked } from "marked"
-import { jpdefs } from "./dictionaries/jpdefs"
+import { n1 as jpdefs } from "./dictionaries/n1"
 import { useScoreStore } from "./stores/counter"
 import { convertStringToHiragana } from "./convert"
 
@@ -12,6 +12,8 @@ onMounted(() => {
     input.value.focus()
   })
 })
+
+const deckType: Ref<"kanji" | "def"> = ref("kanji")
 
 const question = ref({}) as Ref<(typeof jpdefs)[number]>
 const hint = ref("")
@@ -74,7 +76,9 @@ const streakTime = 2500
 function newQuestion() {
   response.value = ""
   question.value = jpdefs[Math.floor(Math.random() * jpdefs.length)]
-  hint.value = "_".repeat(question.value.answer[1].length)
+  hint.value = "_".repeat(
+    question.value.answer[question.value.answer.length - 1].length
+  )
 }
 
 function addHint() {
@@ -149,7 +153,17 @@ newQuestion()
         <!-- Hint for current question -->
         <h3 class="tracking-widest text-gray-400 p-4 text-xl">{{ hint }}</h3>
 
-        <pre class="text-lg" v-html="marked.parse(question.question)"></pre>
+        <h2
+          v-if="deckType === 'kanji'"
+          class="text-6xl text-[color:var(--accent-color)] m-4"
+        >
+          {{ question.question }}
+        </h2>
+        <pre
+          v-if="deckType === 'def'"
+          class="text-lg"
+          v-html="marked.parse(question.question)"
+        ></pre>
 
         <input
           class="bg-transparent m-2 text-lg border-solid border-2 border-gray-500 rounded-sm text-center"
