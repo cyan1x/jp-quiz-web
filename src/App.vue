@@ -83,13 +83,13 @@ function addHint() {
 
 function checkAnswer() {
   // Skip question
-  const skipKeys = ["skip", "sきp", "すきっぷ", "スキップ"]
+  const skipKeys = ["s", "skip", "sきp", "すきっぷ", "スキップ"]
   if (skipKeys.includes(response.value.trim())) {
     newQuestion()
   }
 
   // Add hint
-  const hintKeys = ["hint", "ひんt", "ひんと", "ヒント"]
+  const hintKeys = ["h", "hint", "ひんt", "ひんと", "ヒント"]
   if (hintKeys.includes(response.value.trim())) {
     addHint()
   }
