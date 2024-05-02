@@ -133,9 +133,10 @@ newQuestion()
       class="bg-zinc-800 text-gray-300 flex justify-center items-center h-screen relative"
     >
       <div class="absolute top-4 left-6 md:top-8 md:left-8">
-        <h1 class="md:text-xl">
+        <h1 class="text-xl md:text-2xl">
+          <span class="">jp-</span>
           <span class="border-b-2 border-[color:var(--accent-color)]">q</span>
-          <span>uiz-web</span>
+          <span class="">uiz</span>
         </h1>
       </div>
 
