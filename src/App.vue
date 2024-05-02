@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, type Ref, onMounted, nextTick, computed } from "vue"
 import { marked } from "marked"
-import { n1 as jpdefs } from "./dictionaries/n1"
-import { useScoreStore } from "./stores/counter"
+import { useQuestionStore } from "./stores/question"
+import { useScoreStore } from "./stores/score"
 import { convertStringToHiragana } from "./convert"
 
 // Focus on <input> on page load
@@ -13,15 +13,12 @@ onMounted(() => {
   })
 })
 
-const deckType: Ref<"kanji" | "def"> = ref("kanji")
-
-const question = ref({}) as Ref<(typeof jpdefs)[number]>
-const hint = ref("")
 const response = ref("")
 const scores = useScoreStore()
-const score = ref(0)
-const showScorePlus = ref(false)
+const questions = useQuestionStore()
 
+// Show a plus score message on answer success (e.g. +1)
+const showScorePlus = ref(false)
 const arrowClass = computed(() => {
   return {
     "opacity-0": !showScorePlus.value,
@@ -31,13 +28,11 @@ const arrowClass = computed(() => {
   }
 })
 
+// Show scorePlus if duration > 0
 const scorePlusStreak = ref(0)
 const scorePlusDuration = ref(0)
-
-const interval = 1000
-
-// show scorePlus if duration > 0
 function startTimer() {
+  const interval = 1000
   const timer = setInterval(() => {
     if (scorePlusDuration.value > 0) {
       scorePlusDuration.value = Math.max(
@@ -70,20 +65,19 @@ function restartTimer(timer: NodeJS.Timeout | null) {
   }, transitionDuration)
 }
 
-startTimer()
-const streakTime = 2500
+function clearResponse() {
+  response.value = ""
+}
 
 function newQuestion() {
-  response.value = ""
-  question.value = jpdefs[Math.floor(Math.random() * jpdefs.length)]
-  hint.value = "_".repeat(
-    question.value.answer[question.value.answer.length - 1].length
-  )
+  clearResponse()
+  questions.changeQuestion()
+  // kanji question with two possible answers
+  // question.value = jpdefs.find((v) => v.question === "思惑")
 }
 
-function addHint() {
-  // TODO: Change random "_" in the string to the correct character
-}
+startTimer()
+const streakTime = 2500
 
 function checkAnswer() {
   // Skip question
@@ -95,16 +89,16 @@ function checkAnswer() {
   // Add hint
   const hintKeys = ["h", "hint", "ひんt", "ひんと", "ヒント"]
   if (hintKeys.includes(response.value.trim())) {
-    addHint()
+    questions.hintLevel += 1
+    clearResponse()
   }
 
-  const answers = question.value.answer.map((answer) =>
+  const answers = questions.currentQuestion.answer.map((answer) =>
     convertStringToHiragana(answer)
   )
   const hiragana = convertStringToHiragana(response.value.trim())
-  console.log(hiragana)
   if (answers.includes(hiragana)) {
-    score.value += 1
+    scores.currentScore += 1
     showScorePlus.value = true
     scorePlusStreak.value += 1
     scorePlusDuration.value = streakTime
@@ -148,21 +142,25 @@ newQuestion()
         class="flex lg:w-7/12 p-6 flex-col justify-center items-center flex-wrap"
       >
         <!-- Answer to current question -->
-        <!-- <h1 class="text-gray-700 p-4 text-xl">{{ question.answer }}</h1> -->
+        <h1 class="text-gray-700 p-4 text-xl">
+          {{ questions.currentQuestion.answer }}
+        </h1>
 
         <!-- Hint for current question -->
-        <h3 class="tracking-widest text-gray-400 p-4 text-xl">{{ hint }}</h3>
+        <h3 class="tracking-widest text-gray-400 p-4 text-xl">
+          {{ questions.currentHint }}
+        </h3>
 
         <h2
-          v-if="deckType === 'kanji'"
-          class="text-6xl text-[color:var(--accent-color)] m-4"
+          v-if="questions.deckType === 'kanji'"
+          class="text-7xl text-[color:var(--accent-color)] m-4"
         >
-          {{ question.question }}
+          {{ questions.currentQuestion.question }}
         </h2>
         <pre
-          v-if="deckType === 'def'"
+          v-if="questions.deckType === 'def'"
           class="text-lg"
-          v-html="marked.parse(question.question)"
+          v-html="marked.parse(questions.currentQuestion.question)"
         ></pre>
 
         <input
@@ -173,26 +171,26 @@ newQuestion()
         />
 
         <span class="mt-3"
-          >current score: {{ score }}
+          >current score: {{ scores.currentScore }}
           <span :class="arrowClass" class="text-[color:var(--accent-color)]"
-            >+{{ scorePlusStreak }}</span
+            >+{{ scorePlusStreak || 1 }}</span
           >
           <!-- Duration of score plus indicator (+1, +2...) -->
           <!-- <span> ({{ scorePlusDuration }})</span> -->
         </span>
 
-        <span class="mt-1">overall: {{ scores.score }}</span>
+        <span class="mt-1">overall: {{ scores.totalScore }}</span>
 
-        <div>
+        <div class="flex flex-col mt-2 gap-2">
           <button
-            class="border-solid border-2 border-gray-500 mt-1 p-1 rounded-md"
+            class="border-solid border-2 border-gray-500 p-1 rounded-md"
             @click="resetScores"
           >
             {{ resetMessage }}
           </button>
           <button
             v-if="resetMessage === 'confirm?'"
-            class="border-solid border-2 border-gray-500 m-2 p-1 rounded-md"
+            class="border-solid border-2 border-gray-500 p-1 rounded-md"
             @click="() => (resetMessage = 'reset')"
           >
             cancel
