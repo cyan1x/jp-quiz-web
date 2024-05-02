@@ -52,9 +52,6 @@ export const useQuestionStore = defineStore("question", () => {
     const getIndex = () =>
       Math.floor(Math.random() * answerForHint.value.length)
 
-    console.log(`previousHint: ${previousHint}`)
-    console.log(`answerForHint: ${answerForHint.value}`)
-    console.log(hintLevel.value)
     for (let i = revealedLetterCount; i < hintLevel.value; i += 1) {
       let index = 0
       let letterAlreadyRevealed = true
@@ -72,7 +69,6 @@ export const useQuestionStore = defineStore("question", () => {
       hintLetters[index] = answerForHint.value[index]
     }
 
-    console.log(hintLetters)
     previousHint = hintLetters.join("")
 
     return hintLetters.join("")

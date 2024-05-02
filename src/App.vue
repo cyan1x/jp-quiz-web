@@ -77,7 +77,7 @@ function newQuestion() {
 }
 
 startTimer()
-const streakTime = 2500
+const streakTime = 3000
 
 function checkAnswer() {
   // Skip question
@@ -118,6 +118,23 @@ function resetScores() {
     resetMessage.value = "reset"
   }
 }
+
+const confirmClass = computed(() => {
+  const isConfirm = resetMessage.value === "confirm?"
+
+  return {
+    "text-[0px]": !isConfirm,
+    "text-base": isConfirm,
+    // "transition-all": true,
+    "transition-[font-size]": true,
+    "duration-200": true,
+    "border-solid": isConfirm,
+    "border-2": isConfirm,
+    "border-gray-500": isConfirm,
+    "p-1": true,
+    "rounded-md": true,
+  }
+})
 
 newQuestion()
 </script>
@@ -170,31 +187,36 @@ newQuestion()
           @keyup.enter="checkAnswer"
         />
 
-        <span class="mt-3"
-          >current score: {{ scores.currentScore }}
-          <span :class="arrowClass" class="text-[color:var(--accent-color)]"
-            >+{{ scorePlusStreak || 1 }}</span
-          >
-          <!-- Duration of score plus indicator (+1, +2...) -->
-          <!-- <span> ({{ scorePlusDuration }})</span> -->
-        </span>
+        <div class="flex flex-col m-2">
+          <span class="mt-3"
+            >current score: {{ scores.currentScore }}
+            <span :class="arrowClass" class="text-[color:var(--accent-color)]"
+              >+{{ scorePlusStreak || 1 }}</span
+            >
+            <!-- Duration of score plus indicator (+1, +2...) -->
+            <!-- <span> ({{ scorePlusDuration }})</span> -->
+          </span>
 
-        <span class="mt-1">overall: {{ scores.totalScore }}</span>
-
-        <div class="flex flex-col mt-2 gap-2">
-          <button
-            class="border-solid border-2 border-gray-500 p-1 rounded-md"
-            @click="resetScores"
-          >
-            {{ resetMessage }}
-          </button>
-          <button
-            v-if="resetMessage === 'confirm?'"
-            class="border-solid border-2 border-gray-500 p-1 rounded-md"
-            @click="() => (resetMessage = 'reset')"
-          >
-            cancel
-          </button>
+          <span class="mt-1">overall: {{ scores.totalScore }}</span>
+          <div class="flex flex-col mt-2 gap-2">
+            <button
+              class="border-solid border-2 border-gray-500 p-1 rounded-md"
+              @click="resetScores"
+            >
+              {{ resetMessage }}
+            </button>
+            <!-- <button
+              v-if="resetMessage === 'confirm?'"
+              :class="confirmClass"
+              @click="() => (resetMessage = 'reset')"
+            > -->
+            <button
+              :class="confirmClass"
+              @click="() => (resetMessage = 'reset')"
+            >
+              cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
