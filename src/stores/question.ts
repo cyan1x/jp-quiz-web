@@ -14,7 +14,7 @@ let previousHint = ""
 
 export const useQuestionStore = defineStore("question", () => {
   const settingsStore = useSettingsStore()
-  const deckData = decks[settingsStore.currentDeck]
+  const deckData = computed(() => decks[settingsStore.currentDeck])
 
   const deckType = computed<"kanji" | "def">(() => {
     if (settingsStore.currentDeck === "jpdefs") {
@@ -26,9 +26,12 @@ export const useQuestionStore = defineStore("question", () => {
     throw new Error(`Unknown deck type ${settingsStore.currentDeck}`)
   })
 
-  const currentQuestion = ref(
-    deckData[Math.floor(Math.random() * deckData.length)]
-  )
+  const randomIndex = () => Math.floor(Math.random() * deckData.value.length)
+  const questionIndex = ref(randomIndex())
+
+  const currentQuestion = computed(() => {
+    return deckData.value[questionIndex.value]
+  })
 
   const answerForHint = computed(() => {
     if (deckType.value === "kanji") {
@@ -77,8 +80,7 @@ export const useQuestionStore = defineStore("question", () => {
   function changeQuestion() {
     previousHint = ""
     hintLevel.value = 0
-    currentQuestion.value =
-      deckData[Math.floor(Math.random() * deckData.length)]
+    questionIndex.value = randomIndex()
   }
 
   return { currentQuestion, hintLevel, currentHint, deckType, changeQuestion }

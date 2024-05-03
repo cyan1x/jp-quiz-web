@@ -4,6 +4,7 @@ import { marked } from "marked"
 import { useQuestionStore } from "./stores/question"
 import { useScoreStore } from "./stores/score"
 import { convertStringToHiragana } from "./convert"
+import Decklist from "./components/Decklist.vue"
 
 // Focus on <input> on page load
 const input = ref({}) as Ref<HTMLInputElement>
@@ -148,17 +149,20 @@ const confirmClass = computed(() => {
     "border-solid": isConfirm,
     "border-2": isConfirm,
     "border-gray-500": isConfirm,
-    "p-1": true,
+    "p-1": isConfirm,
     "rounded-md": true,
   }
 })
 
+const deckList = ref<InstanceType<typeof Decklist>>()
 newQuestion()
 </script>
 
 <template>
   <!-- <header>
   </header> -->
+
+  <Decklist ref="deckList" />
 
   <main>
     <div
@@ -218,7 +222,7 @@ newQuestion()
           </span>
 
           <span class="mt-1">all time: {{ scores.totalScore }}</span>
-          <div class="flex flex-col mt-2 gap-2">
+          <div class="flex flex-col mt-2 gap-1">
             <button
               class="border-solid border-2 border-gray-500 p-1 rounded-md"
               @click="resetScores"
@@ -232,9 +236,15 @@ newQuestion()
             > -->
             <button
               :class="confirmClass"
-              @click="() => (resetMessage = 'reset')"
+              @click="() => (resetMessage = 'reset scores')"
             >
               cancel
+            </button>
+            <button
+              class="border-solid border-2 border-gray-500 p-1 rounded-md"
+              @click="deckList.toggleVisible"
+            >
+              decks
             </button>
           </div>
         </div>

@@ -1,7 +1,6 @@
-export const jpdefs: {
-  question: string
-  answer: string[]
-}[] = [
+import type { QuizDeck } from "./types"
+
+export const jpdefs: QuizDeck = [
   {
     question:
       "__**名詞**__\n① 終局時に、どちらの陣地でもない領域のこと\n② 改善すべき点の指摘\n__**形容動詞**__\n① よくない。程度が低い。\n② うまくいかない。できない。\n③ 見込みがない。絶望的だ。\n④ 禁止されている。応じられない。\n⑤ 使い物にならない。役に立たない。壊れた。\n⑥ ならない。いけない。",

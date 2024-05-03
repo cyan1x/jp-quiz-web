@@ -1,11 +1,20 @@
-import { ref, computed, readonly } from "vue"
-import { defineStore } from "pinia"
+import { ref, readonly, watch } from "vue"
+import { defineStore, storeToRefs } from "pinia"
+import { useSettingsStore } from "./settings"
 
 export const useScoreStore = defineStore(
   "score",
   () => {
+    const { currentDeck } = storeToRefs(useSettingsStore())
+
     const currentScore = ref(0)
     const totalScore = ref(0)
+
+    watch(currentDeck, (newDeck, oldDeck) => {
+      if (newDeck !== oldDeck) {
+        currentScore.value = 0
+      }
+    })
 
     function increase(amount: number) {
       currentScore.value += amount
@@ -19,7 +28,7 @@ export const useScoreStore = defineStore(
 
     return {
       currentScore: readonly(currentScore),
-      // Persistent data cannot be readonly
+      // Cannot be set as readonly, as readonly data cannot be persisted
       totalScore,
       increase,
       reset,

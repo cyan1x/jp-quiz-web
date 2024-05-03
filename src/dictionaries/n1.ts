@@ -1,8 +1,6 @@
-export const n1: {
-  question: string
-  answer: string[]
-  meaning: string
-}[] = [
+import type { QuizDeck } from "./types"
+
+export const n1: QuizDeck = [
   {
     question: "黙る",
     answer: ["だまる"],
