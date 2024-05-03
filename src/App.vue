@@ -169,6 +169,7 @@ newQuestion()
           <span class="">jp-</span>
           <span class="border-b-2 border-[color:var(--accent-color)]">q</span>
           <span class="">uiz</span>
+          <span class="text-xs md:text-sm m-1">beta</span>
         </h1>
       </div>
 
@@ -176,9 +177,9 @@ newQuestion()
         class="flex lg:w-7/12 p-6 flex-col justify-center items-center flex-wrap"
       >
         <!-- Answer to current question -->
-        <h1 class="text-gray-700 p-4 text-xl">
+        <!-- <h1 class="text-gray-700 p-4 text-xl">
           {{ questions.currentQuestion.answer }}
-        </h1>
+        </h1> -->
 
         <!-- Hint for current question -->
         <h3 class="tracking-widest text-gray-400 p-4 text-xl">
