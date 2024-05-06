@@ -91,6 +91,11 @@ function checkAnswer() {
   // Add hint
   const hintKeys = ["h", "hint", "ひんt", "ひんと", "ヒント"]
   if (hintKeys.includes(response.value.trim())) {
+    if (questions.deckType === "anagrams") {
+      console.log("Hints not supported in anagram decks")
+      clearResponse()
+      return
+    }
     questions.hintLevel += 1
     clearResponse()
   }
@@ -186,12 +191,17 @@ newQuestion()
         </h1> -->
 
         <!-- Hint for current question -->
-        <h3 class="tracking-widest text-gray-400 p-4 text-xl">
+        <h3
+          v-if="questions.deckType !== 'anagrams'"
+          class="tracking-widest text-gray-400 p-4 text-xl"
+        >
           {{ questions.currentHint }}
         </h3>
 
         <h2
-          v-if="questions.deckType === 'kanji'"
+          v-if="
+            questions.deckType === 'kanji' || questions.deckType === 'anagrams'
+          "
           class="text-7xl text-[color:var(--accent-color)] m-4"
         >
           {{ questions.currentQuestion.question }}

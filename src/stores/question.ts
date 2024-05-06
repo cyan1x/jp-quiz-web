@@ -10,33 +10,60 @@ function toHint(s: string) {
   return preferredType.repeat(s.length)
 }
 
+function shuffleArray<T>(array: T[]): T[] {
+  const copy = array.slice()
+
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+
+  return copy
+}
+
 let previousHint = ""
 
 export const useQuestionStore = defineStore("question", () => {
   const settingsStore = useSettingsStore()
   const deckData = computed(() => decks[settingsStore.currentDeck])
 
-  const deckType = computed<"kanji" | "def">(() => {
+  const deckType = computed<"kanji" | "def" | "anagrams">(() => {
     if (settingsStore.currentDeck === "jpdefs") {
       return "def"
     } else if (settingsStore.currentDeck === "n1") {
       return "kanji"
+    } else if (settingsStore.currentDeck.includes("anagrams")) {
+      return "anagrams"
     }
 
     throw new Error(`Unknown deck type ${settingsStore.currentDeck}`)
   })
 
-  const randomIndex = () => Math.floor(Math.random() * deckData.value.length)
-  const questionIndex = ref(randomIndex())
+  let refreshKey = ref(0)
+  const questionIndex = computed(() => {
+    refreshKey.value
+    return Math.floor(Math.random() * deckData.value.length)
+  })
 
   const currentQuestion = computed(() => {
+    if (deckType.value === "anagrams") {
+      return {
+        ...deckData.value[questionIndex.value],
+        question: shuffleArray(
+          deckData.value[questionIndex.value].question.split("")
+        ).join(""),
+      }
+    }
+
     return deckData.value[questionIndex.value]
   })
 
   const answerForHint = computed(() => {
-    if (deckType.value === "kanji") {
+    if (deckType.value === "kanji" || deckType.value === "anagrams") {
       return currentQuestion.value.answer[0]
-    } else if (deckType.value === "def") {
+    }
+
+    if (deckType.value === "def") {
       return currentQuestion.value.answer[
         currentQuestion.value.answer.length - 1
       ]
@@ -80,7 +107,9 @@ export const useQuestionStore = defineStore("question", () => {
   function changeQuestion() {
     previousHint = ""
     hintLevel.value = 0
-    questionIndex.value = randomIndex()
+
+    // Refresh currentQuestion
+    refreshKey.value += 1
   }
 
   return { currentQuestion, hintLevel, currentHint, deckType, changeQuestion }
