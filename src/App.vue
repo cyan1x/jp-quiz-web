@@ -91,11 +91,6 @@ function checkAnswer() {
   // Add hint
   const hintKeys = ["h", "hint", "ひんt", "ひんと", "ヒント"]
   if (hintKeys.includes(response.value.trim())) {
-    if (questions.deckType === "anagrams") {
-      console.log("Hints not supported in anagram decks")
-      clearResponse()
-      return
-    }
     questions.hintLevel += 1
     clearResponse()
   }
@@ -127,6 +122,8 @@ function checkAnswer() {
     scorePlusStreak.value += questionValue
     scorePlusDuration.value = streakTime
     newQuestion()
+  } else {
+    clearResponse()
   }
 }
 
@@ -191,10 +188,7 @@ newQuestion()
         </h1> -->
 
         <!-- Hint for current question -->
-        <h3
-          v-if="questions.deckType !== 'anagrams'"
-          class="tracking-widest text-gray-400 p-4 text-xl"
-        >
+        <h3 class="tracking-widest text-gray-400 p-4 text-xl">
           {{ questions.currentHint }}
         </h3>
 
