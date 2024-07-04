@@ -47,6 +47,9 @@ const decklistClass = computed(() =>
         @click="() => (settings.currentDeck = deck)">
         {{ deck }}
       </button>
+      <button class="border-solid border-2 border-gray-500 p-1 rounded-md mt-auto" @click="toggleVisible">
+        close
+      </button>
     </div>
   </div>
 </template>
