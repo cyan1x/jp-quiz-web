@@ -20,7 +20,7 @@ const decklistClass = computed(() =>
     {
       "right-8": visible.value,
       // Off-screen
-      "-right-32": !visible.value,
+      "-right-64": !visible.value,
     }
   )
 )
@@ -41,14 +41,10 @@ const decklistClass = computed(() =>
 <template>
   <div :class="decklistClass">
     <div
-      class="bg-zinc-900/25 text-gray-300 text-center border-2 border-solid border-gray-600 h-5/6 w-32 flex flex-col gap-1 p-3 px-4 rounded-md"
-    >
+      class="bg-zinc-900 text-gray-300 text-center border-2 border-solid border-gray-600 h-5/6 w-48 flex flex-col gap-1 p-3 px-4 rounded-md">
       <h2 class="md:text-lg mt-2 mb-1">Decks</h2>
-      <button
-        class="border-solid border-2 border-gray-500 p-1 rounded-md"
-        v-for="deck in settings.deckList"
-        @click="() => (settings.currentDeck = deck)"
-      >
+      <button class="border-solid border-2 border-gray-500 p-1 rounded-md" v-for="deck in settings.deckList"
+        @click="() => (settings.currentDeck = deck)">
         {{ deck }}
       </button>
     </div>

@@ -5,6 +5,7 @@ import { useQuestionStore } from "./stores/question"
 import { useScoreStore } from "./stores/score"
 import { convertStringToHiragana } from "./convert"
 import Decklist from "./components/Decklist.vue"
+import { useSettingsStore } from "./stores/settings"
 
 // Focus on <input> on page load
 const input = ref({}) as Ref<HTMLInputElement>
@@ -17,6 +18,7 @@ onMounted(() => {
 const response = ref("")
 const scores = useScoreStore()
 const questions = useQuestionStore()
+const settings = useSettingsStore()
 
 // Show a plus score message on answer success (e.g. +1)
 const showScorePlus = ref(false)
@@ -151,12 +153,18 @@ const confirmClass = computed(() => {
     "border-solid": isConfirm,
     "border-2": isConfirm,
     "border-gray-500": isConfirm,
-    "p-1": isConfirm,
+    "p-2": isConfirm,
     "rounded-md": true,
   }
 })
 
 const deckList = ref<InstanceType<typeof Decklist>>()
+
+const helpVisible = ref(false)
+function toggleHelp() {
+  helpVisible.value = !helpVisible.value
+}
+
 newQuestion()
 </script>
 
@@ -167,9 +175,7 @@ newQuestion()
   <Decklist ref="deckList" />
 
   <main>
-    <div
-      class="bg-zinc-800 text-gray-300 flex justify-center items-center h-screen relative"
-    >
+    <div class="bg-zinc-800 text-gray-300 flex justify-center items-center h-screen relative">
       <div class="absolute top-4 left-6 md:top-8 md:left-8">
         <h1 class="text-xl md:text-2xl">
           <span class="">jp-</span>
@@ -179,9 +185,7 @@ newQuestion()
         </h1>
       </div>
 
-      <div
-        class="flex lg:w-7/12 p-6 flex-col justify-center items-center flex-wrap"
-      >
+      <div class="flex lg:w-7/12 p-6 flex-col justify-center items-center flex-wrap">
         <!-- Answer to current question -->
         <!-- <h1 class="text-gray-700 p-4 text-xl">
           {{ questions.currentQuestion.answer }}
@@ -192,45 +196,34 @@ newQuestion()
           {{ questions.currentHint }}
         </h3>
 
-        <h2
-          v-if="
-            questions.deckType === 'kanji' || questions.deckType === 'anagrams'
-          "
-          class="text-7xl text-[color:var(--accent-color)] m-4"
-        >
+        <h2 v-if="
+          questions.deckType === 'kanji' || questions.deckType === 'anagrams'
+        " class="text-7xl text-[color:var(--accent-color)] m-4">
           {{ questions.currentQuestion.question }}
         </h2>
-        <pre
-          v-if="questions.deckType === 'def'"
-          class="text-lg"
-          v-html="marked.parse(questions.currentQuestion.question)"
-        ></pre>
+        <pre v-if="questions.deckType === 'def'" class="text-lg"
+          v-html="marked.parse(questions.currentQuestion.question)"></pre>
 
-        <input
-          :disabled="lockInput"
+        <input :disabled="lockInput"
           class="disabled:text-gray-500 bg-transparent m-2 text-lg border-solid border-2 border-gray-500 rounded-sm text-center"
-          ref="input"
-          v-model="response"
-          @keyup.enter="checkAnswer"
-          spellcheck="false"
-        />
+          ref="input" v-model="response" @keyup.enter="checkAnswer" spellcheck="false" />
 
-        <div class="flex flex-col m-2">
-          <span class="mt-3"
-            >round score: {{ scores.currentScore }}
-            <span :class="arrowClass" class="text-[color:var(--accent-color)]"
-              >+{{ scorePlusStreak || 1 }}</span
-            >
-            <!-- Duration of score plus indicator (+1, +2...) -->
-            <!-- <span> ({{ scorePlusDuration }})</span> -->
-          </span>
-
-          <span class="mt-1">all time: {{ scores.totalScore }}</span>
-          <div class="flex flex-col mt-2 gap-1">
-            <button
-              class="border-solid border-2 border-gray-500 p-1 rounded-md"
-              @click="resetScores"
-            >
+        <div class="grid grid-cols-2 gap-4 m-4">
+          <div class="flex flex-col m-2 gap-1 justify-center">
+            <span class="text-sm text-gray-500">deck:</span>
+            <span>{{ settings.currentDeck }}</span>
+            <span class="text-sm text-gray-500">score:</span>
+            <span>
+              {{ scores.currentScore }}
+              <span :class="arrowClass" class="text-[color:var(--accent-color)]">+{{ scorePlusStreak || 1 }}</span>
+              <!-- Duration of score plus indicator (+1, +2...) -->
+              <!-- <span> ({{ scorePlusDuration }})</span> -->
+            </span>
+            <span class="text-sm text-gray-500">all time: </span>
+            <span>{{ scores.totalScore }}</span>
+          </div>
+          <div class="flex flex-col gap-1 flex-wrap justify-center">
+            <button class="border-solid border-2 border-gray-500 p-2 rounded-md" @click="resetScores">
               {{ resetMessage }}
             </button>
             <!-- <button
@@ -238,18 +231,33 @@ newQuestion()
               :class="confirmClass"
               @click="() => (resetMessage = 'reset')"
             > -->
-            <button
-              :class="confirmClass"
-              @click="() => (resetMessage = 'reset scores')"
-            >
+            <button :class="confirmClass" @click="() => (resetMessage = 'reset scores')">
               cancel
             </button>
-            <button
-              class="border-solid border-2 border-gray-500 p-1 rounded-md"
-              @click="deckList.toggleVisible"
-            >
+            <button class="border-solid border-2 border-gray-500 p-2 rounded-md" @click="deckList.toggleVisible">
               decks
             </button>
+            <button class="border-solid border-2 border-gray-500 p-2 rounded-md" @click="toggleHelp">
+              help
+            </button>
+          </div>
+          <div v-if="helpVisible" class="col-span-2 flex flex-col gap-1">
+            <p class="text-sm text-gray-500">
+              help
+            </p>
+            <p class="text-gray-200">
+              <span v-if="settings.currentDeck === 'anagrams5'">
+                - anagrams5: unscramble the given word <br />
+              </span>
+              <span v-if="settings.currentDeck === 'n1'">
+                - n1: type the reading of the word<br />
+              </span>
+              <span v-if="settings.currentDeck === 'jpdefs'">
+                - jpdefs: type the word described by the definition <br />
+              </span>
+              - input "s" or "skip" to skip the current question <br />
+              - input "h" or "hint" to get a hint (reducing score) <br />
+            </p>
           </div>
         </div>
       </div>
